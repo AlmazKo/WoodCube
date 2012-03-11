@@ -15,11 +15,12 @@ using namespace std;
 
 const short matrix[4][3][3] = {0};
 int INDEX = 0;
+int FOUND = 0;
 const short PLANCH_LEVEL = 8;
 const short BUSY_ITEM = 1;
-const short ITEMS_SIZE = 6;
+const short ITEMS = 6;
 
-const short items[ITEMS_SIZE][3][3] = {
+const short items[ITEMS][3][3] = {
     {
         {0, 0, 1},
         {0 | PLANCH_LEVEL, 0 | PLANCH_LEVEL, 1 | PLANCH_LEVEL},
@@ -70,6 +71,7 @@ typedef short box[4][3][3];
 const short ALL_ITEMS_SIZE = sizeof (items);
 const short ITEMS_SIZE = sizeof (planch);
 const short MATRIX_SIZE = sizeof (box);
+const short RESULT_SIZE = sizeof (successfull) * 6;
 
 void turn(const planch item, planch out);
 void turn_upside_down(const planch item, planch out);
@@ -77,13 +79,13 @@ void add_tablet(const short position, const planch item, box out_matrix);
 
 void show_planch(const planch item);
 void show_box(const box matrix);
-bool start(successfull result[ITEMS_SIZE], box current_matrix);
+bool start(successfull result[ITEMS], box current_matrix);
 
 bool check_box(const box matrix);
-void show_result(const successfull result[ITEMS_SIZE]);
+void show_result(const successfull result[ITEMS]);
 
-bool check_result(const successfull result[ITEMS_SIZE]);
-bool in_result(const short id, const successfull result[ITEMS_SIZE]);
+bool check_result(const successfull result[ITEMS]);
+bool in_result(const short id, const successfull result[ITEMS]);
 
 int main()
 {
@@ -108,11 +110,12 @@ int main()
     show_box(matrix);
     cout << endl;
     box working_matrix;
-    successfull result[ITEMS_SIZE] = {};
+    successfull result[ITEMS] = {};
 
     memcpy(working_matrix, matrix, MATRIX_SIZE);
     start(result, working_matrix);
 
+    cout << "\n\nFound: " << FOUND << endl;
     return 0;
 }
 
@@ -253,22 +256,27 @@ bool check_box(const box matrix)
 bool start(successfull result[ITEMS_SIZE], box current_matrix)
 {
     box new_matrix;
-    for (int i = 0; i < ITEMS_SIZE; i++) {
+    for (int i = 0; i < ITEMS; i++) {
         if (in_result(i, result)) continue;
 
         for (int position = 0; position < 3; position++) {
             memcpy(new_matrix, current_matrix, MATRIX_SIZE);
-            cout << '\n' << ++INDEX << " Add planch (" << i <<") position: " << position << endl;
+//            cout << '\n' << ++INDEX << " Add planch (" << i <<") position: " << position << endl;
             add_tablet(position, items[i], new_matrix);
 
             if (check_box(new_matrix)) {
-                result[i].ready = true;
-                result[i].position = position;
-                result[i].item = i;
-                if (check_result(result)) {
-                    show_result(result);
+                successfull temp_result[ITEMS];
+
+                memcpy(temp_result, result, RESULT_SIZE);
+                temp_result[i].ready = true;
+                temp_result[i].position = position;
+                temp_result[i].item = i;
+                if (check_result(temp_result)) {
+                    FOUND++;
+                    show_result(temp_result);
                     return true;
                 }
+
                 start(temp_result, new_matrix);
             }
 
@@ -279,10 +287,10 @@ bool start(successfull result[ITEMS_SIZE], box current_matrix)
     return false;
 }
 
-void show_result(const successfull result[ITEMS_SIZE])
+void show_result(const successfull result[ITEMS])
 {
     cout << endl;
-    for (int i = 0; i < ITEMS_SIZE; i++) {
+    for (int i = 0; i < ITEMS; i++) {
         cout << endl << i;
         if (result[i].ready) {
             cout << " - ready";
@@ -294,19 +302,24 @@ void show_result(const successfull result[ITEMS_SIZE])
     }
 }
 
-bool check_result(const successfull result[ITEMS_SIZE])
+bool check_result(const successfull result[ITEMS])
 {
-        for (int i = 0; i < ITEMS_SIZE; i++) {
-            if (!result[i].ready) return false;
-        }
+//    for (int i = 0; i < ITEMS; i++) {
+//        if (!result[i].ready) return false;
+//    }
 
-        return true;
+    short found = 0;
+    for (int i = 0; i < ITEMS; i++) {
+        if (result[i].ready) found++;
+    }
+    return (found > 2) ? true : false;
 }
 
-bool in_result(const short id, const successfull result[ITEMS_SIZE])
+bool in_result(const short id, const successfull result[ITEMS])
 {
-        for (int i = 0; i < ITEMS_SIZE; i++) {
+        for (int i = 0; i < ITEMS; i++) {
             if (result[i].item == id && result[i].ready) return true;
         }
-        return false
+        return false;
 }
+
