@@ -176,7 +176,7 @@ void turn(const planch item, planch out)
     out[2][2] = item[2][0];
 }
 
-void add_tablet(const short position, const planch item, box out_matrix)
+void add_tablet(short position, const planch item, box out_matrix)
 {
     short level = 1;
     planch working_item;
@@ -185,6 +185,7 @@ void add_tablet(const short position, const planch item, box out_matrix)
 
     if (position & 64) {
         level = 2;
+        position -= 64;
     }
 
     if (position & 32) {
@@ -229,6 +230,14 @@ void add_tablet(const short position, const planch item, box out_matrix)
         out_matrix[level + 1][0][position - 3] += working_item[0][0];
         out_matrix[level + 1][1][position - 3] += working_item[0][1];
         out_matrix[level + 1][2][position - 3] += working_item[0][2];
+
+        out_matrix[level][0][position - 3] += working_item[1][0];
+        out_matrix[level][1][position - 3] += working_item[1][1];
+        out_matrix[level][2][position - 3] += working_item[1][2];
+
+        out_matrix[level - 1][0][position - 3] += working_item[2][0];
+        out_matrix[level - 1][1][position - 3] += working_item[2][1];
+        out_matrix[level - 1][2][position - 3] += working_item[2][2];
         break;
     }
 
@@ -259,28 +268,32 @@ bool start(successfull result[ITEMS_SIZE], box current_matrix)
     for (int i = 0; i < ITEMS; i++) {
         if (in_result(i, result)) continue;
 
-        for (int position = 0; position < 3; position++) {
-            memcpy(new_matrix, current_matrix, MATRIX_SIZE);
-//            cout << '\n' << ++INDEX << " Add planch (" << i <<") position: " << position << endl;
-            add_tablet(position, items[i], new_matrix);
 
-            if (check_box(new_matrix)) {
-                successfull temp_result[ITEMS];
+        for (short turn = 0; turn < 2; turn++)
+            for (short lvl = 0; lvl < 2; lvl++) {
+                for (int position = 0; position < 6; position++) {
+                    memcpy(new_matrix, current_matrix, MATRIX_SIZE);
+        //            cout << '\n' << ++INDEX << " Add planch (" << i <<") position: " << position << endl;
+                    add_tablet(position | (lvl * 64), items[i], new_matrix);
 
-                memcpy(temp_result, result, RESULT_SIZE);
-                temp_result[i].ready = true;
-                temp_result[i].position = position;
-                temp_result[i].item = i;
-                if (check_result(temp_result)) {
-                    FOUND++;
-                    show_result(temp_result);
-                    return true;
+                    if (check_box(new_matrix)) {
+                        successfull temp_result[ITEMS];
+
+                        memcpy(temp_result, result, RESULT_SIZE);
+                        temp_result[i].ready = true;
+                        temp_result[i].position = position | (lvl * 64);
+                        temp_result[i].item = i;
+                        if (check_result(temp_result)) {
+                            FOUND++;
+                            show_result(temp_result);
+                            return true;
+                        }
+
+                        start(temp_result, new_matrix);
+                    }
+
                 }
-
-                start(temp_result, new_matrix);
             }
-
-        }
     }
 
 
@@ -312,7 +325,7 @@ bool check_result(const successfull result[ITEMS])
     for (int i = 0; i < ITEMS; i++) {
         if (result[i].ready) found++;
     }
-    return (found > 2) ? true : false;
+    return (found > 5) ? true : false;
 }
 
 bool in_result(const short id, const successfull result[ITEMS])
