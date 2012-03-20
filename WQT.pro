@@ -3,5 +3,11 @@ CONFIG += console
 CONFIG += debug
 CONFIG -= qt
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    functions.cpp \
+    tests.cpp
+
+HEADERS += \
+    functions.h \
+    tests.h
 
