@@ -6,31 +6,29 @@
  */
 
 #include <iostream>
-#include <stdio.h>
 #include <string.h>
-#include <stdlib.h>
-#include <sstream>
+
 #include <functions.h>
 #include <tests.h>
 
 using namespace std;
 using namespace wood_cube;
 
+extern long long INDEX;
 
-int main()
+int main(int argc, char *argv[])
 {
-//    test_turn();
-//    test_turn_upside_down();
-    test_add_item();
-     cout << endl;
+    if (argc > 1) {
+        all_tests();
+        return 0;
+    }
 
-//    show_box(matrix);
-//    cout << endl;
-//    box working_matrix;
-//    successfull result[ITEMS] = {};
+    box working_matrix;
+    successfull result[ITEMS] = {};
 
-//    memcpy(working_matrix, matrix, MATRIX_SIZE);
-//    start(result, working_matrix);
+    memcpy(working_matrix, matrix, MATRIX_SIZE);
+    start(result, working_matrix);
 
-//    return 0;
+    return 0;
 }
+

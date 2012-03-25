@@ -1,8 +1,3 @@
-#include <iostream>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <sstream>
 
 #include "tests.h"
 #include "functions.h"
@@ -10,6 +5,13 @@
 using namespace std;
 
 namespace wood_cube {
+
+    void all_tests() {
+        test_turn();
+        test_turn_upside_down();
+        test_add_planch();
+        cout << endl;
+    }
 
     void test_turn_upside_down() {
         planch result;
@@ -27,7 +29,7 @@ namespace wood_cube {
         turn_upside_down(item, result);
 
         if (memcmp(expect, result, ITEMS_SIZE)) {
-            cout << "Planch don't equals" << endl;
+            cout << "Planches aren't equal" << endl;
             cout << "Expects:" << endl;
             show_planch(expect);
 
@@ -39,35 +41,6 @@ namespace wood_cube {
         }
 
     }
-
-//    planch test_turn_items[][2] = {
-
-//        {
-//            {
-//                {0, 0, 0},
-//                {1 | PLANCH_LEVEL, 1| PLANCH_LEVEL, 0 | PLANCH_LEVEL},
-//                {0, 0, 0}
-//            },
-//            {
-//                {0, 0, 0},
-//                {0 | PLANCH_LEVEL, 1| PLANCH_LEVEL, 1 | PLANCH_LEVEL},
-//                {0, 0, 0}
-//            }
-//        },
-//        {
-//            {
-//                {0, 0, 0},
-//                {1 | PLANCH_LEVEL, 1| PLANCH_LEVEL, 0 | PLANCH_LEVEL},
-//                {0, 0, 5}
-//            },
-//            {
-//                {0, 0, 0},
-//                {0 | PLANCH_LEVEL, 1| PLANCH_LEVEL, 1 | PLANCH_LEVEL},
-//                {0, 0, 8}
-//            }
-//        }
-
-//    };
 
     void test_turn(){
         planch result;
@@ -85,7 +58,7 @@ namespace wood_cube {
         turn(item, result);
 
         if (memcmp(expect, result, ITEMS_SIZE)) {
-            cout << "Planch don't equals" << endl;
+            cout << "Planches aren't equal" << endl;
             cout << "Expects:" << endl;
             show_planch(expect);
 
@@ -99,19 +72,31 @@ namespace wood_cube {
 
     }
 
-   void test_add_item() {
-       planch item = {
-           {0, 0, 1},
-           {1 | PLANCH_LEVEL, 1| PLANCH_LEVEL, 0 | PLANCH_LEVEL},
-           {0, 1, 0}
-       };
-       box matrix = {0};
-       add_planch(1, item, matrix);
-       box expect = {
-           {{0,0,0}, {0,0,0}, {0,0,0}},
-           {{0,0,0}, {0,1,0}, {0,0,0}},
-           {{0,0,0}, {0,0,0}, {0,0,0}}
-       };
-       show_box(expect);
-   }
+    void test_add_planch() {
+        planch item = {
+            {0, 1, 2},
+            {3 ,4, 5},
+            {6, 7, 8}
+        };
+        box actual = {};
+        add_planch(5, item, actual, 0);
+        box expect = {
+            {{0,0,6}, {0,0,7}, {0,0,8}},
+            {{0,0,3}, {0,0,4}, {0,0,5}},
+            {{0,0,0}, {0,0,1}, {0,0,2}},
+            {{0,0,0}, {0,0,0}, {0,0,0}}
+        };
+
+        if (memcmp(expect, actual, MATRIX_SIZE)) {
+            cout << "Boxes aren't equal" << endl;
+            cout << "Expects:" << endl;
+            show_box(expect);
+
+            cout << "Actual:" << endl;
+            show_box(actual);
+            cout << endl;
+        } else {
+            cout << '.';
+        }
+    }
 }

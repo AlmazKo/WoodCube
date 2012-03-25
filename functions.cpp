@@ -1,9 +1,3 @@
-#include <iostream>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <sstream>
-
 #include "functions.h"
 
 using namespace std;
@@ -25,8 +19,8 @@ void show_planch(const planch item)
 void show_box(const box matrix)
 {
     string info;
-    stringstream out;
 
+    cout << " --0--  --1--  --2--\n";
     for (int i = 3; i >= 0; i--) {
         for (int j = 0; j < 3; j++) {
             for (int k = 0; k < 3; k++) {
@@ -34,12 +28,12 @@ void show_box(const box matrix)
                     cout << ' ';
                 }
                 cout << matrix[i][j][k];
-//                info += out.str();
             }
-            cout << " ";
+            cout << ' ';
         }
-        cout << "\n";
+        cout << '\n';
     }
+
 
 }
 
@@ -73,52 +67,23 @@ void turn(const planch item, planch out)
     out[2][2] = item[2][0];
 }
 
-void add_planch(short position, const planch item, box out_matrix)
+void add_planch(short position, const planch item, box out_matrix, short level)
 {
-    short level = 1;
-    planch working_item;
-    memcpy(working_item, item, ITEMS_SIZE);
-
-
-    if (position & 64) {
-        level = 2;
-        position -= 64;
-    }
-
-    if (position & 32) {
-        planch temp_item;
-        memcpy(temp_item, working_item, ITEMS_SIZE);
-        turn(working_item, temp_item);
-        memcpy(working_item, temp_item, ITEMS_SIZE);
-        position -= 32;
-    }
-
-    if (position & 16) {
-        planch temp_item;
-        memcpy(temp_item, working_item, ITEMS_SIZE);
-        turn_upside_down(working_item, temp_item);
-        memcpy(working_item, temp_item, ITEMS_SIZE);
-        position -= 16;
-    }
-
-
-//    show_planch(item);
-
     switch (position) {
     case 0:
     case 1:
     case 2:
-        out_matrix[level + 1][position][0] += working_item[0][0];
-        out_matrix[level + 1][position][1] += working_item[0][1];
-        out_matrix[level + 1][position][2] += working_item[0][2];
+        out_matrix[level + 2][position][0] += item[0][0];
+        out_matrix[level + 2][position][1] += item[0][1];
+        out_matrix[level + 2][position][2] += item[0][2];
 
-        out_matrix[level][position][0] += working_item[1][0];
-        out_matrix[level][position][1] += working_item[1][1];
-        out_matrix[level][position][2] += working_item[1][2];
+        out_matrix[level + 1][position][0] += item[1][0];
+        out_matrix[level + 1][position][1] += item[1][1];
+        out_matrix[level + 1][position][2] += item[1][2];
 
-        out_matrix[level - 1][position][0] += working_item[2][0];
-        out_matrix[level - 1][position][1] += working_item[2][1];
-        out_matrix[level - 1][position][2] += working_item[2][2];
+        out_matrix[level][position][0] += item[2][0];
+        out_matrix[level][position][1] += item[2][1];
+        out_matrix[level][position][2] += item[2][2];
 
         break;
 
@@ -126,22 +91,19 @@ void add_planch(short position, const planch item, box out_matrix)
     case 4:
     case 5:
 
-        out_matrix[level + 1][0][position - 3] += working_item[0][0];
-        out_matrix[level + 1][1][position - 3] += working_item[0][1];
-        out_matrix[level + 1][2][position - 3] += working_item[0][2];
+        out_matrix[level + 2][0][position - 3] += item[0][0];
+        out_matrix[level + 2][1][position - 3] += item[0][1];
+        out_matrix[level + 2][2][position - 3] += item[0][2];
 
-        out_matrix[level][0][position - 3] += working_item[1][0];
-        out_matrix[level][1][position - 3] += working_item[1][1];
-        out_matrix[level][2][position - 3] += working_item[1][2];
+        out_matrix[level + 1][0][position - 3] += item[1][0];
+        out_matrix[level + 1][1][position - 3] += item[1][1];
+        out_matrix[level + 1][2][position - 3] += item[1][2];
 
-        out_matrix[level - 1][0][position - 3] += working_item[2][0];
-        out_matrix[level - 1][1][position - 3] += working_item[2][1];
-        out_matrix[level - 1][2][position - 3] += working_item[2][2];
+        out_matrix[level][0][position - 3] += item[2][0];
+        out_matrix[level][1][position - 3] += item[2][1];
+        out_matrix[level][2][position - 3] += item[2][2];
         break;
     }
-
-//cout << "\nResult box: " << endl;
-//show_box(out_matrix);
 }
 
 bool check_box(const box matrix)
@@ -161,45 +123,56 @@ bool check_box(const box matrix)
     return true;
 }
 
-bool start(successfull result[ITEMS_SIZE], box current_matrix)
+bool start(successfull result[ITEMS], box current_matrix)
 {
-    box new_matrix;
-    short modify_position;
+
+    box new_matrix = {};
+    planch working_planch, temp_planch;
+
     for (int i = 0; i < ITEMS; i++) {
         if (in_result(i, result)) continue;
 
-    for (short uturn = 0; uturn < 2; uturn++)
-       for (short turn = 0; turn < 2; turn++)
-            for (short lvl = 0; lvl < 2; lvl++)
-                for (int position = 0; position < 6; position++) {
-                    memcpy(new_matrix, current_matrix, MATRIX_SIZE);
-        //            cout << '\n' << ++INDEX << " Add planch (" << i <<") position: " << position << endl;
-                    modify_position = ((position | (lvl * 64)) | (turn * 32)) | (uturn * 16);
-                    ++INDEX;
-                    add_planch(modify_position, items[i], new_matrix);
 
-                    if (!(INDEX % 1000000)) {
-                        cout << INDEX << endl;
+        for (int position = 0; position < 6; position++){
+            for (short level = 0; level < 2; level++) {
+                for (short uturn = 0; uturn < 2; uturn++) {
+                    if (uturn) {
+                        turn_upside_down(items[i], working_planch);
+                    } else {
+                        memcpy(working_planch, items[i], ITEMS_SIZE);
                     }
-
-                    if (check_box(new_matrix)) {
-                        successfull temp_result[ITEMS];
-
-                        memcpy(temp_result, result, RESULT_SIZE);
-                        temp_result[i].ready = true;
-                        temp_result[i].position = modify_position;
-                        temp_result[i].item = i;
-                        if (check_result(temp_result)) {
-                            FOUND++;
-                            show_result(temp_result);
-                            return true;
+                    for (short can_turn = 0; can_turn < 2; can_turn++) {
+                        if (can_turn) {
+                            turn(working_planch, temp_planch);
+                            memcpy(working_planch, temp_planch, ITEMS_SIZE);
                         }
 
-                        start(temp_result, new_matrix);
+                        ++INDEX;
+                        memcpy(new_matrix, current_matrix, MATRIX_SIZE);
+
+                        add_planch(position, working_planch, new_matrix, level);
+
+                        if (check_box(new_matrix)) {
+                            successfull temp_result[ITEMS];
+
+                            memcpy(temp_result, result, RESULT_SIZE);
+                            temp_result[i].ready = true;
+                            temp_result[i].position = position;
+                            temp_result[i].item = i;
+                            temp_result[i].turn = can_turn;
+                            temp_result[i].turn_upside_down = uturn;
+                            if (check_result(temp_result)) {
+                                FOUND++;
+                                show_solution(temp_result, new_matrix, FOUND);
+                                return true;
+                            }
+
+                            start(temp_result, new_matrix);
+                        }
                     }
-
                 }
-
+            }
+        }
     }
 
 
@@ -208,16 +181,12 @@ bool start(successfull result[ITEMS_SIZE], box current_matrix)
 
 void show_result(const successfull result[ITEMS])
 {
-    cout << endl;
     for (int i = 0; i < ITEMS; i++) {
-        cout << endl << i;
-        if (result[i].ready) {
-            cout << " - ready";
-        } else {
+        if (!result[i].ready) {
             cout << " - error";
         }
 
-        cout << ", position: " << result[i].position << endl;
+        cout << result[i].item << ") position: " << result[i].position << ", turn:" << result[i].turn << ", turn upside down:" << result[i].turn_upside_down << endl;
     }
 }
 
@@ -226,13 +195,34 @@ bool check_result(const successfull result[ITEMS])
     for (int i = 0; i < ITEMS; i++) {
         if (!result[i].ready) return false;
     }
+    return true;
 }
 
 bool in_result(const short id, const successfull result[ITEMS])
 {
-        for (int i = 0; i < ITEMS; i++) {
-            if (result[i].item == id && result[i].ready) return true;
-        }
-        return false;
+    for (int i = 0; i < ITEMS; i++) {
+        if (result[i].item == id && result[i].ready) return true;
+    }
+    return false;
 }
+
+void show_binary(unsigned dec) {
+    for (int t = 128; t > 0; t = t/2) {
+        if (t == 8) cout << ' ';
+        if (dec & t) {
+            cout << '1';
+        } else {
+            cout << '0';
+        }
+    }
+    cout << endl;
+}
+
+void show_solution(const successfull result[ITEMS], const box matrix, int found)
+{
+    cout << "\nFound Solution (" << found << "):\n";
+    show_result(result);
+    show_box(matrix);
+}
+
 }
